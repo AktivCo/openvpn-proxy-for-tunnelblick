@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <limits.h>
+#include <errno.h>
 
 int main(int argc, char* argv[])
 {
@@ -12,9 +13,11 @@ int main(int argc, char* argv[])
 	char* new_argv[ARG_MAX];
 
 	char new_path[PATH_MAX];
-       	new_path[0]=0;
+	new_path[0]=0;
 	strcat(new_path, argv[0]);
 	strcat(new_path, "_origin");
+	ssize_t size=readlink(new_path, new_path, PATH_MAX);
+	new_path[size]=0;
 	new_argv[0] = new_path;
 
 	for (int pos=1; pos < argc; ++pos) {
@@ -32,13 +35,18 @@ int main(int argc, char* argv[])
 
 	new_argv[argc] = 0;
 	
-	pid_t pid = fork();
-	if (!pid) execv(new_path, new_argv);
-	if (is_daemon) return 0;
+	if (is_daemon) {
+		pid_t pid = fork();
+		if (!pid) execv(new_path, new_argv);
 
-	int status;
-	if (waitpid(pid, &status, 0) == -1) return -1;
-	if (!WIFEXITED(status))	return -1;
+		usleep(500);
 
-	return WEXITSTATUS(status);
+		int status;
+		if (waitpid(pid, &status, WNOHANG) == 0) return 0;
+		if (!WIFEXITED(status)) return -1;
+		return WEXITSTATUS(status);
+	} else {
+		execv(new_path, new_argv);
+		return 255;
+	}
 }

@@ -82,8 +82,21 @@ ln -s "$openvpnPath" Openvpn/$dirName/openvpn_origin
 cp build/openvpn Openvpn/$dirName
 ln -s "`dirname ${openvpnPath}`/openvpn-down-root.so" Openvpn/$dirName/openvpn-down-root.so 
 
-chown -R root:wheel Openvpn
-chmod -R 0755 Openvpn
-chmod 0744 Openvpn/$dirName/openvpn-down-root.so
-rsync -av Openvpn "$dst"
+chown -R -h root:wheel Openvpn
+chmod -R -P 0755 Openvpn
+chmod -h 0744 Openvpn/$dirName/openvpn-down-root.so
 
+if ! [ -d "$dst/Openvpn"  ]
+then
+	mkdir "$dst/Openvpn" 
+	chown -R -h root:wheel "$dst/Openvpn"
+fi
+
+if [ -d "$dst/Openvpn/$dirDame" ]
+then
+	rm -rf "$dst/Openvpn/$dirDame"
+fi
+
+mkdir "$dst/Openvpn/$dirDame"
+
+cp -R -P Openvpn/$dirName "$dst/Openvpn/$dirDame"

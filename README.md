@@ -7,7 +7,7 @@
 	```bash
 	cc main.c -o build/openvpn
 	```
-2. Зпустить скрипт install.sh с помощью команды:
+2. Запустить скрипт install.sh с помощью команды:
 	```bash
 	sudo ./install.sh
 	```
